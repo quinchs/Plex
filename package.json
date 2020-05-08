@@ -1,0 +1,30 @@
+{
+    "name": "PROJECT_NAME",
+    "version": "0.0.1",
+    "description": "",
+    "main": "build/index.js",
+    "scripts": {
+        "prestart": "tsc",
+        "start": "cross-env NODE_ENV=production node .",
+        "dev": "tsc-watch --onSuccess \"node .\"",
+        "create-docker-image": "docker build --tag PROJECT_NAME .",
+        "preexport-docker-image": "docker build --tag PROJECT_NAME .",
+        "export-docker-image": "docker save --output PROJECT_NAME-image.tar PROJECT_NAME"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "tsc-watch": "^4.2.3",
+        "typescript": "^3.8.3"
+    },
+    "devDependencies": {
+        "@types/node": "^13.11.0",
+        "@typescript-eslint/eslint-plugin": "^2.27.0",
+        "@typescript-eslint/parser": "^2.27.0",
+        "cross-env": "^7.0.2",
+        "eslint": "^6.8.0",
+        "eslint-config-prettier": "^6.10.1",
+        "eslint-plugin-prettier": "^3.1.2",
+        "prettier": "^2.0.4"
+    }
+}
