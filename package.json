@@ -7,9 +7,9 @@
         "prestart": "tsc",
         "start": "cross-env NODE_ENV=production node .",
         "dev": "tsc-watch --onSuccess \"node .\"",
-        "create-docker-image": "docker build --tag PROJECT_NAME .",
-        "preexport-docker-image": "docker build --tag PROJECT_NAME .",
-        "export-docker-image": "docker save --output PROJECT_NAME-image.tar PROJECT_NAME"
+        "create-docker-image": "docker build --tag ub .",
+        "preexport-docker-image": "docker build --tag ub .",
+        "export-docker-image": "docker save --output ub-image.tar ub"
     },
     "author": "",
     "license": "ISC",
@@ -23,6 +23,7 @@
     },
     "devDependencies": {
         "@types/mongodb": "^3.5.16",
+        "@types/mongoose": "^5.7.15",
         "@types/node": "^13.11.0",
         "@typescript-eslint/eslint-plugin": "^2.27.0",
         "@typescript-eslint/parser": "^2.27.0",
