@@ -1,0 +1,32 @@
+export = {
+    token: process.env.token,
+    mongodb: process.env.db,
+    prefix: "!",
+    devs: ["2"],
+    emojis: {
+        check: "✅",
+        error: "❌",
+        one: "1️⃣",
+        two: "2️⃣",
+        three: "3️⃣",
+        four: "4️⃣",
+        five: "5️⃣",
+        six: "6️⃣",
+        seven: "7️⃣",
+        eight: "8️⃣",
+        nine: "9️⃣",
+        ten: "🔟",
+        zero: "0️⃣",
+        leftArrow: "▶",
+        rightArrow: "◀",
+        upArrow: "🔼",
+        downArrow: "🔽",
+    },
+    botname: "ub",
+    status: [
+        {
+            name: "Watching {serversCount} servers",
+            type: "LISTENING",
+        },
+    ],
+};
