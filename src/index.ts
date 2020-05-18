@@ -10,11 +10,10 @@ dotenv.config();
 const dev = process.env.dev ? true : false;
 const client = new Main({ partials: ["MESSAGE", "CHANNEL", "REACTION"] }, dev);
 const start = async () => {
-    readdir(join(__dirname, "./commands"), (err, files: string[]) => {
+    readdir(join(__dirname, "./commands"), (_, files: string[]) => {
         client.logger.log(`Loading a total of ${files.length} categories.`, "log");
         files.forEach(async (dir) => {
-            console.log(dir);
-            readdir(join(__dirname, "./command/", dir, "/"), (error, commands: string[]) => {
+            readdir(join(__dirname, `./commands/${dir}`), (_, commands: string[]) => {
                 commands
                     .filter((cmd) => cmd.split(".").pop() === (dev ? "ts" : "js"))
                     .forEach((cmd) => {
@@ -32,9 +31,9 @@ const start = async () => {
         files.forEach((file) => {
             const eventName: any = file.split(".")[0];
             client.logger.log(`Loading Event: ${eventName}`);
-            const event = new (require(join(__dirname, "./events", file)))(client);
+            const event = new (require(join(__dirname, `./events/${file}`)))(client);
             client.on(eventName, (...args) => event.run(...args));
-            delete require.cache[require.resolve(join(__dirname, "./events", file))];
+            delete require.cache[require.resolve(join(__dirname, `./events/${file}`))];
         });
     });
 
