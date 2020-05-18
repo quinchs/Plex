@@ -5,15 +5,16 @@ import mongnpoDB from "mongodb";
 import mongoose from "mongoose";
 import Main from "./main/main";
 import { readdir } from "fs";
+import { join } from "path";
 dotenv.config();
 const dev = process.env.dev ? true : false;
 const client = new Main({ partials: ["MESSAGE", "CHANNEL", "REACTION"] }, dev);
 const start = async () => {
-    readdir("./src/commands/", (err, files: string[]) => {
+    readdir(join(__dirname, "./commands"), (err, files: string[]) => {
         client.logger.log(`Loading a total of ${files.length} categories.`, "log");
         files.forEach(async (dir) => {
             console.log(dir);
-            readdir("./src/commands/" + dir + "/", (error, commands: string[]) => {
+            readdir(join(__dirname, "./command/", dir, "/"), (error, commands: string[]) => {
                 commands
                     .filter((cmd) => cmd.split(".").pop() === (dev ? "ts" : "js"))
                     .forEach((cmd) => {
@@ -26,15 +27,14 @@ const start = async () => {
         });
     });
     // Then we load events, which will include our message and ready event.
-    readdir("./src/events/", (err, files: string[]) => {
+    readdir(join(__dirname, "./events"), (err, files: string[]) => {
         client.logger.log(`Loading a total of ${files.length} events.`, "log");
         files.forEach((file) => {
             const eventName: any = file.split(".")[0];
-            console.log(file);
             client.logger.log(`Loading Event: ${eventName}`);
-            const event = new (require(`../src/events/${file}`))(client);
+            const event = new (require(join(__dirname, "./events", file)))(client);
             client.on(eventName, (...args) => event.run(...args));
-            delete require.cache[require.resolve(`../src/events/${file}`)];
+            delete require.cache[require.resolve(join(__dirname, "./events", file))];
         });
     });
 
