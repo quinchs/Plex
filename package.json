@@ -1,23 +1,38 @@
 {
-    "name": "PROJECT_NAME",
+    "name": "ub",
     "version": "0.0.1",
     "description": "",
     "main": "build/index.js",
     "scripts": {
-        "prestart": "tsc",
-        "start": "cross-env NODE_ENV=production node .",
-        "dev": "tsc-watch --onSuccess \"node .\"",
-        "create-docker-image": "docker build --tag PROJECT_NAME .",
-        "preexport-docker-image": "docker build --tag PROJECT_NAME .",
-        "export-docker-image": "docker save --output PROJECT_NAME-image.tar PROJECT_NAME"
+        "start": "node ./dist/index.js",
+        "build": "rm -rf dist/ && tsc",
+        "dev": "ts-node-dev ./src/index.ts"
     },
+    "heroku-run-build-script": true,
+    "repository": {
+    "type": "git",
+    "url": "git+https://github.com/carterdacat/ub.git"
+    },
+   "keywords": [
+    "heroku",
+    "discord.js"
+    ],
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "chalk": "^4.0.0",
+        "discord.js": "^12.2.0",
+        "dotenv": "^8.2.0",
+        "mongodb": "^3.5.7",
+        "mongoose": "^5.9.13",
+        "path": "^0.12.7",
         "tsc-watch": "^4.2.3",
-        "typescript": "^3.8.3"
+        "typescript": "^3.8.3",
+        "util": "^0.12.3"
     },
     "devDependencies": {
+        "@types/mongodb": "^3.5.16",
+        "@types/mongoose": "^5.7.15",
         "@types/node": "^13.11.0",
         "@typescript-eslint/eslint-plugin": "^2.27.0",
         "@typescript-eslint/parser": "^2.27.0",
