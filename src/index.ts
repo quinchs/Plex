@@ -17,7 +17,7 @@ const start = async () => {
             readdir(join(__dirname, `./commands/${dir}`), (_, commands: string[]) => {
                 console.log(commands);
                 commands
-                    .filter((cmd) => cmd.split(".").pop() === "ts")
+                    .filter((cmd) => cmd.split(".").pop() === (dev ? "ts" : "js"))
                     .forEach((cmd) => {
                         const response = client.loadCommand("./commands/" + dir, cmd);
                         if (response) {
