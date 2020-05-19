@@ -70,10 +70,8 @@ module.exports = class {
                 message.channel.send("That user is afk");
             }
         });
-        this.client.logger.log("Zone 1", "debug");
         const prefix: any = await getPrefix(message, this.data, this.client);
         if (!prefix) return;
-        this.client.logger.log("Zone 2", "debug");
         const args = message.content
             .slice(typeof prefix === "string" ? prefix.length : 0)
             .trim()
@@ -83,7 +81,6 @@ module.exports = class {
             this.client.commands.get(command) ||
             this.client.commands.get(this.client.aliases.get(command));
         if (!cmd) return;
-        this.client.logger.log("Zone 3", "debug");
         if (cmd.conf.guildOnly && !message.guild) {
             return message.channel.send("That command is only usable in guilds");
         }
