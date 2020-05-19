@@ -13,7 +13,9 @@ const start = async () => {
     readdir(join(__dirname, "./commands"), (_, files: string[]) => {
         client.logger.log(`Loading a total of ${files.length} categories.`, "log");
         files.forEach(async (dir) => {
+            console.log(dir);
             readdir(join(__dirname, `./commands/${dir}`), (_, commands: string[]) => {
+                console.log(commands);
                 commands
                     .filter((cmd) => cmd.split(".").pop() === "ts")
                     .forEach((cmd) => {
