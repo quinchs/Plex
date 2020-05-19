@@ -9,13 +9,9 @@ module.exports = class extends Command {
             description: "Gets the ping to me from you",
         });
     }
-    async run(message, args, data) {
-        await message.chanel.send("Pinging...").then((m: Message) => {
-            m.edit(
-                `Pong! Latency is ${
-                    m.createdTimestamp - message.createdTimestamp
-                }ms. API Latency is ${Math.round(this.client.ping)}ms`
-            );
+    async run(message: Message, _args, _data) {
+        await message.channel.send("Pinging...").then((m: Message) => {
+            m.edit(`Pong! Latency is ${m.createdTimestamp - message.createdTimestamp}ms.`);
         });
     }
 };
