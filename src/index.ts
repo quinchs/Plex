@@ -15,7 +15,7 @@ const start = async () => {
         files.forEach(async (dir) => {
             readdir(join(__dirname, `./commands/${dir}`), (_, commands: string[]) => {
                 commands
-                    .filter((cmd) => cmd.split(".").pop() === (dev ? "ts" : "js"))
+                    .filter((cmd) => cmd.split(".").pop() === "ts")
                     .forEach((cmd) => {
                         const response = client.loadCommand("./commands/" + dir, cmd);
                         if (response) {
