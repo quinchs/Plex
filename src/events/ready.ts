@@ -16,7 +16,7 @@ module.exports = class {
             `${client.user.tag}, ready to serve ${client.users.cache.size} users in ${client.guilds.cache.size} servers.`,
             "ready"
         );
-        const status = require("../config.ts").status,
+        const status = client.status,
             version = require("../../package.json").version;
         let i = 0;
         setInterval(function () {
