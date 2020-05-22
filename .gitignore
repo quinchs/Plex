@@ -120,3 +120,5 @@ dist
 .yarn/build-state.yml
 .pnp.*
 /src/commands/Dev
+
+.DS_Store

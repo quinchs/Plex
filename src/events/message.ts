@@ -92,7 +92,6 @@ module.exports = class {
             }
             cmd.conf.botPermissions.forEach((perm) => {
                 if (!message.channel.permissionsFor(message.guild.me).has(perm)) {
-                    //@ts-ignore
                     neededPermission.push(perm);
                 }
             });
@@ -105,7 +104,6 @@ module.exports = class {
             neededPermission = [];
             cmd.conf.memberPermissions.forEach((perm) => {
                 if (!message.channel.permissionsFor(message.member).has(perm)) {
-                    //@ts-ignore
                     neededPermission.push(perm);
                 }
             });
@@ -177,8 +175,8 @@ async function updateXp(
     data: { guild?: any; member?: any; user?: any }
 ) {
     // Gets the user informations
-    const points = parseInt(data.member.exp);
-    const level = parseInt(data.member.level);
+    const points: number = parseInt(data.member.exp);
+    const level: number = parseInt(data.member.level);
 
     // if the member is already in the cooldown db
     const isInCooldown = xpCooldown[msg.author.id];
@@ -193,21 +191,18 @@ async function updateXp(
 
     // Gets a random number between 10 and 5
     const won = Math.floor(Math.random() * (Math.floor(10) - Math.ceil(5))) + Math.ceil(5);
-    //@ts-ignore
-    const newXp = parseInt(points + won, 10);
+    const newXp = points + won;
 
     // calculation how many xp it takes for the next new one
     const neededXp = 5 * (level * level) + 80 * level + 100;
 
     // check if the member up to the next level
     if (newXp > neededXp) {
-        //@ts-ignore
-        data.member.level = parseInt(level + 1, 10);
+        data.member.level = level + 1;
     }
 
     // Update user data
-    //@ts-ignore
-    data.member.exp = parseInt(newXp, 10);
+    data.member.exp = newXp;
     await data.member.save();
 }
 
