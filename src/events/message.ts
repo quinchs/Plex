@@ -52,6 +52,10 @@ module.exports = class {
         ) {
             if (/(discord\.(gg|io|me|li)\/.+|discordapp\.com\/invite\/.+)/i.test(message.content)) {
                 if (!message.channel.permissionsFor(message.member).has("MANAGE_MESSAGES")) {
+                    this.client.logger.log(
+                        `Auto moderated a message. Message: ${message.content}. Server: ${message.guild.name}. User: ${message.author.tag}`,
+                        "warn"
+                    );
                     message.delete();
                     return message.author.send("```" + message.content + "```");
                 }
@@ -82,6 +86,10 @@ module.exports = class {
             this.client.commands.get(this.client.aliases.get(command));
         if (!cmd) return;
         if (cmd.conf.guildOnly && !message.guild) {
+            this.client.logger.log(
+                `Guild only command used in dm. Command: ${message.content}. User: ${message.author.tag}`,
+                "warn"
+            );
             return message.channel.send("That command is only usable in guilds");
         }
 
@@ -92,7 +100,6 @@ module.exports = class {
             }
             cmd.conf.botPermissions.forEach((perm) => {
                 if (!message.channel.permissionsFor(message.guild.me).has(perm)) {
-                    //@ts-ignore
                     neededPermission.push(perm);
                 }
             });
@@ -101,55 +108,90 @@ module.exports = class {
                     "I need the following permissions to perform this command:" +
                         neededPermission.map((p) => `\`${p}\``).join(", ")
                 );
+                this.client.logger.log(
+                    `Unable to send a message due to permision constrants. Command: ${
+                        message.content
+                    }. Needed Perms: ${neededPermission}. User: ${message.author.tag}. ${
+                        message.guild ? message.guild.name : "In dms"
+                    }`,
+                    "warn"
+                );
             }
             neededPermission = [];
             cmd.conf.memberPermissions.forEach((perm) => {
                 if (!message.channel.permissionsFor(message.member).has(perm)) {
-                    //@ts-ignore
                     neededPermission.push(perm);
                 }
             });
             if (neededPermission.length > 0) {
-                return message.channel.send(
+                message.channel.send(
                     "You need the following permissions to perform this command:" +
                         neededPermission.map((p) => `\`${p}\``).join(", ")
+                );
+                return this.client.logger.log(
+                    `Unable to send a message due to a user not having permission. Command: ${
+                        message.content
+                    }. Needed Perms: ${neededPermission}. User: ${message.author.tag}. ${
+                        message.guild ? message.guild.name : "In dms"
+                    }`,
+                    "warn"
                 );
             }
             if (
                 this.data.guild.ignoredChannels.includes(message.channel.id) &&
                 !message.member.hasPermission("MANAGE_MESSAGES")
             ) {
-                return (
-                    message.delete() &&
-                    message.author.send("Commands are forbidden in " + message.channel)
+                message.delete() &&
+                    message.author.send("Commands are forbidden in " + message.channel);
+                return this.client.logger.log(
+                    `Unable to send a message due to the channel being ignored. Command: ${
+                        message.content
+                    }. User: ${message.author.tag}. ${
+                        message.guild ? message.guild.name : "In dms"
+                    }`,
+                    "warn"
                 );
-            }
-
-            if (cmd.conf.permission) {
-                if (!message.member.hasPermission(cmd.conf.permission)) {
-                    return message.channel.send(
-                        message.language.get("INHIBITOR_PERMISSIONS", cmd.conf.permission)
-                    );
-                }
             }
 
             if (
                 !message.channel.permissionsFor(message.member).has("MENTION_EVERYONE") &&
                 (message.content.includes("@everyone") || message.content.includes("@here"))
             ) {
-                return message.channel.send(
+                message.channel.send(
                     "You are not allowed to mention everyone or here in the commands."
+                );
+                return this.client.logger.log(
+                    `Unable to send a message due to @everyone permission constraints. Command: ${
+                        message.content
+                    }. User: ${message.author.tag}. ${
+                        message.guild ? message.guild.name : "In dms"
+                    }`,
+                    "warn"
                 );
             }
             if (!message.channel.nsfw && cmd.conf.nsfw) {
-                return message.channel.send(
+                message.channel.send(
                     "You must go to in a channel that allows the NSFW to type this command!"
+                );
+                return this.client.logger.log(
+                    `Unable to send a message due to it not being a nsfw channel. Command: ${
+                        message.content
+                    }. User: ${message.author.tag}. ${
+                        message.guild ? message.guild.name : "In dms"
+                    }`,
+                    "warn"
                 );
             }
         }
 
         if (!cmd.conf.enabled) {
-            return message.channel.send("This command is currently disabled!");
+            message.channel.send("This command is currently disabled!");
+            return this.client.logger.log(
+                `Unable to send a message due to the command being disabled. Command: ${
+                    message.content
+                }. User: ${message.author.tag}. ${message.guild ? message.guild.name : "In dms"}`,
+                "warn"
+            );
         }
 
         this.client.logger.log(
@@ -163,7 +205,7 @@ module.exports = class {
                 message.delete();
             }
         } catch (e) {
-            console.error(e);
+            this.client.logger.log(e, "error");
             return message.channel.send(
                 "An error has occurred, please try again in a few minutes."
             );
@@ -177,8 +219,8 @@ async function updateXp(
     data: { guild?: any; member?: any; user?: any }
 ) {
     // Gets the user informations
-    const points = parseInt(data.member.exp);
-    const level = parseInt(data.member.level);
+    const points: number = parseInt(data.member.exp);
+    const level: number = parseInt(data.member.level);
 
     // if the member is already in the cooldown db
     const isInCooldown = xpCooldown[msg.author.id];
@@ -193,21 +235,18 @@ async function updateXp(
 
     // Gets a random number between 10 and 5
     const won = Math.floor(Math.random() * (Math.floor(10) - Math.ceil(5))) + Math.ceil(5);
-    //@ts-ignore
-    const newXp = parseInt(points + won, 10);
+    const newXp = points + won;
 
     // calculation how many xp it takes for the next new one
     const neededXp = 5 * (level * level) + 80 * level + 100;
 
     // check if the member up to the next level
     if (newXp > neededXp) {
-        //@ts-ignore
-        data.member.level = parseInt(level + 1, 10);
+        data.member.level = level + 1;
     }
 
     // Update user data
-    //@ts-ignore
-    data.member.exp = parseInt(newXp, 10);
+    data.member.exp = newXp;
     await data.member.save();
 }
 

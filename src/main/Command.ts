@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* @ts-ignore */
 import path from "path";
 
 export default class Command {
@@ -30,9 +29,8 @@ export default class Command {
             nsfw = false,
         }: any
     ) {
-        //@ts-ignore
         // eslint-disable-next-line prettier/prettier
-        const category = dirname ? dirname.split(path.sep)[parseInt(dirname.split(path.sep).length - 1, 10)]
+        const category = dirname ? dirname.split(path.sep)[dirname.split(path.sep).length - 1]
             : "Other";
         this.client = client;
         this.conf = {

@@ -15,6 +15,9 @@ module.exports = class {
             .setDescription(`To configure the bot, do ${this.client.config.prefix}config.`);
         const owner: GuildMember = guild.owner as GuildMember;
         owner.send(welcomeMessage);
-        return this.client.logger.log(`Joined a new server ${guild.name}`, "log");
+        return this.client.logger.log(
+            `Joined a new server ${guild.name}. Now Serving ${this.client.guild.cache.size} servers with ${this.client.users.cache.size}`,
+            "log"
+        );
     }
 };

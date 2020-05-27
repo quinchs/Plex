@@ -40,7 +40,6 @@ const start = async () => {
     client.login(process.env.token);
 
     mongoose
-        //@ts-ignore
         .connect(process.env.db, { useNewUrlParser: true, useUnifiedTopology: true })
         .then(() => {
             client.logger.log("Connected to the Mongodb database.", "log");
