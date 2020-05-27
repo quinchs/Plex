@@ -52,6 +52,10 @@ module.exports = class {
         ) {
             if (/(discord\.(gg|io|me|li)\/.+|discordapp\.com\/invite\/.+)/i.test(message.content)) {
                 if (!message.channel.permissionsFor(message.member).has("MANAGE_MESSAGES")) {
+                    this.client.logger.log(
+                        `Auto moderated a message. Message: ${message.content}. Server: ${message.guild.name}. User: ${message.author.tag}`,
+                        "warn"
+                    );
                     message.delete();
                     return message.author.send("```" + message.content + "```");
                 }
@@ -82,6 +86,10 @@ module.exports = class {
             this.client.commands.get(this.client.aliases.get(command));
         if (!cmd) return;
         if (cmd.conf.guildOnly && !message.guild) {
+            this.client.logger.log(
+                `Guild only command used in dm. Command: ${message.content}. User: ${message.author.tag}`,
+                "warn"
+            );
             return message.channel.send("That command is only usable in guilds");
         }
 
@@ -100,6 +108,14 @@ module.exports = class {
                     "I need the following permissions to perform this command:" +
                         neededPermission.map((p) => `\`${p}\``).join(", ")
                 );
+                this.client.logger.log(
+                    `Unable to send a message due to permision constrants. Command: ${
+                        message.content
+                    }. Needed Perms: ${neededPermission}. User: ${message.author.tag}. ${
+                        message.guild ? message.guild.name : "In dms"
+                    }`,
+                    "warn"
+                );
             }
             neededPermission = [];
             cmd.conf.memberPermissions.forEach((perm) => {
@@ -108,46 +124,74 @@ module.exports = class {
                 }
             });
             if (neededPermission.length > 0) {
-                return message.channel.send(
+                message.channel.send(
                     "You need the following permissions to perform this command:" +
                         neededPermission.map((p) => `\`${p}\``).join(", ")
+                );
+                return this.client.logger.log(
+                    `Unable to send a message due to a user not having permission. Command: ${
+                        message.content
+                    }. Needed Perms: ${neededPermission}. User: ${message.author.tag}. ${
+                        message.guild ? message.guild.name : "In dms"
+                    }`,
+                    "warn"
                 );
             }
             if (
                 this.data.guild.ignoredChannels.includes(message.channel.id) &&
                 !message.member.hasPermission("MANAGE_MESSAGES")
             ) {
-                return (
-                    message.delete() &&
-                    message.author.send("Commands are forbidden in " + message.channel)
+                message.delete() &&
+                    message.author.send("Commands are forbidden in " + message.channel);
+                return this.client.logger.log(
+                    `Unable to send a message due to the channel being ignored. Command: ${
+                        message.content
+                    }. User: ${message.author.tag}. ${
+                        message.guild ? message.guild.name : "In dms"
+                    }`,
+                    "warn"
                 );
-            }
-
-            if (cmd.conf.permission) {
-                if (!message.member.hasPermission(cmd.conf.permission)) {
-                    return message.channel.send(
-                        message.language.get("INHIBITOR_PERMISSIONS", cmd.conf.permission)
-                    );
-                }
             }
 
             if (
                 !message.channel.permissionsFor(message.member).has("MENTION_EVERYONE") &&
                 (message.content.includes("@everyone") || message.content.includes("@here"))
             ) {
-                return message.channel.send(
+                message.channel.send(
                     "You are not allowed to mention everyone or here in the commands."
+                );
+                return this.client.logger.log(
+                    `Unable to send a message due to @everyone permission constraints. Command: ${
+                        message.content
+                    }. User: ${message.author.tag}. ${
+                        message.guild ? message.guild.name : "In dms"
+                    }`,
+                    "warn"
                 );
             }
             if (!message.channel.nsfw && cmd.conf.nsfw) {
-                return message.channel.send(
+                message.channel.send(
                     "You must go to in a channel that allows the NSFW to type this command!"
+                );
+                return this.client.logger.log(
+                    `Unable to send a message due to it not being a nsfw channel. Command: ${
+                        message.content
+                    }. User: ${message.author.tag}. ${
+                        message.guild ? message.guild.name : "In dms"
+                    }`,
+                    "warn"
                 );
             }
         }
 
         if (!cmd.conf.enabled) {
-            return message.channel.send("This command is currently disabled!");
+            message.channel.send("This command is currently disabled!");
+            return this.client.logger.log(
+                `Unable to send a message due to the command being disabled. Command: ${
+                    message.content
+                }. User: ${message.author.tag}. ${message.guild ? message.guild.name : "In dms"}`,
+                "warn"
+            );
         }
 
         this.client.logger.log(
@@ -161,7 +205,7 @@ module.exports = class {
                 message.delete();
             }
         } catch (e) {
-            console.error(e);
+            this.client.logger.log(e, "error");
             return message.channel.send(
                 "An error has occurred, please try again in a few minutes."
             );
