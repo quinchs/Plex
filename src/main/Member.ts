@@ -9,6 +9,16 @@ const a = mongoose.model(
         /* SERVER ECONOMY */
         exp: { type: Number, default: 0 }, // Exp points of the user
         level: { type: Number, default: 0 }, // Level of the user
+        money: { type: Number, default: 0 },
+        cooldowns: {
+            type: Object,
+            default: {
+                work: 0,
+                rob: 0,
+            },
+        },
+        workStreak: { type: Number, default: 0 }, // work streak of the user
+        bankSold: { type: Number, default: 0 }, // Bank sold of the user
 
         /* STATS */
         registeredAt: { type: Number, default: Date.now() }, // Registered date of the member

@@ -12,14 +12,14 @@ const a = mongoose.model(
         prefix: { type: String, default: config.prefix }, // Default or custom prefix of the guild
         ignoredChannels: { type: Array, default: [] }, // Channels ignored by the bot
         commands: { type: Array, default: [] }, // Commands logs
-        autoDeleteModCommands: { type: Boolean, default: false }, // Whether to auto delete moderation commands
-        disabledCategories: { type: Array, default: [] }, // Disabled categories
-        logs: { type: String, default: false },
+        autoDeleteModCommands: { type: Boolean, default: false }, // Whether to auto delete moderation commands // Disabled categories
         plugins: {
             type: Object,
             default: {
-                logs: false,
                 modlogs: false,
+                logs: {
+                    level: false,
+                },
                 autoRole: {
                     enabled: false,
                     role: null,
@@ -27,13 +27,17 @@ const a = mongoose.model(
                 autoMod: {
                     enabled: false,
                     ignored: [],
+                    level: 1,
+                },
+                warnLimits: {
+                    kick: false,
+                    ban: false,
                 },
                 reports: false,
                 suggestions: false,
-                mod: false,
-                admin: false,
             },
         },
+        caseCount: { type: Number, default: 0 },
     })
 );
 export default a;
