@@ -104,11 +104,11 @@ module.exports = class {
                 }
             });
             if (neededPermission.length > 0) {
-                return message.channel.send(
+                message.channel.send(
                     "I need the following permissions to perform this command:" +
                         neededPermission.map((p) => `\`${p}\``).join(", ")
                 );
-                this.client.logger.log(
+                return this.client.logger.log(
                     `Unable to send a message due to permision constrants. Command: ${
                         message.content
                     }. Needed Perms: ${neededPermission}. User: ${message.author.tag}. ${
@@ -198,6 +198,19 @@ module.exports = class {
             `${message.author.username} (${message.author.id}) ran command ${cmd.help.name}`,
             "cmd"
         );
+        const log = new this.client.logs({
+            commandName: cmd.help.name,
+            author: {
+                username: message.author.username,
+                discriminator: message.author.discriminator,
+                id: message.author.id,
+            },
+            guild: {
+                name: message.guild ? message.guild.name : "dm",
+                id: message.guild ? message.guild.id : "dm",
+            },
+        });
+        log.save();
 
         try {
             cmd.run(message, args, this.data);

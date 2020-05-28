@@ -6,6 +6,7 @@ import guild from "./Guild";
 import member from "./Member";
 import user from "./User";
 import path from "path";
+import log from "./DBLog"
 //CLient class:
 class Main extends Client {
     config: any;
@@ -21,9 +22,11 @@ class Main extends Client {
     userData: import("mongoose").Model<import("mongoose").Document, {}>;
     logger: typeof logger;
     dev: boolean;
+    logs: any;
 
     constructor(options, dev: boolean) {
         super(options);
+        this.logs = log;
         this.config = Config;
         this.commands = new Collection();
         this.aliases = new Collection();
@@ -123,7 +126,7 @@ class Main extends Client {
             if (this.dbCache.guild.get(guildID)) {
                 resolve(this.dbCache.guild.get(guildID));
             } else {
-                let data = await this.guildData.findOne({ id: guildID }).populate("Member");
+                let data = await this.guildData.findOne({ id: guildID }).populate("members");
                 if (data) {
                     resolve(data);
                 } else {
