@@ -9,6 +9,7 @@ import * as user from "./controllers/user";
 import * as member from "./controllers/member";
 import * as guild from "./controllers/guild";
 import parser from "body-parser";
+import axios from "axios";
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ const client = new Plex(dev, { partials: ["MESSAGE", "CHANNEL", "REACTION"] });
 export const app = express();
 
 const start = async () => {
+    axios.defaults.validateStatus = () => true;
     readdir(join(__dirname, "./commands"), (_, files: string[]) => {
         client.logger.log(`Loading a total of ${files.length} categories.`, "log");
         files.forEach(async (dir) => {
@@ -75,6 +77,7 @@ const start = async () => {
     app.get("/guild", guild.findGuild);
     app.put("/guild", parser.json(), guild.updateGuild);
     app.delete("/guild", guild.deleteGuild);
+    client.clearCache();
 };
 
 start();

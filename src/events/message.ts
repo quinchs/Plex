@@ -4,12 +4,17 @@
 const xpCooldown = {};
 import Plex from "../main/Plex";
 import { Message, GuildChannel, TextChannel } from "discord.js";
-
+import axios from "axios";
 module.exports = class {
     client: Plex;
     data: any;
     constructor(client: Plex) {
         this.client = client;
+        this.data = {
+            guild: {},
+            member: {},
+            user: {},
+        };
     }
     async run(message: Message) {
         if (message.author.bot) return;
@@ -57,8 +62,16 @@ module.exports = class {
         }
         const afkReason = this.data.user.afk;
         if (afkReason) {
-            this.data.user.afk = null;
-            await this.data.user.save();
+            await axios({
+                url: `http://localhost:${process.env.PORT || 3000}/user`,
+                method: "post",
+                params: {
+                    id: this.data.user.id,
+                },
+                data: {
+                    afk: null,
+                },
+            });
             message.channel.send(`Afk turned off for ${message.author.tag}`);
         }
         message.mentions.users.forEach(async (u) => {
@@ -253,8 +266,18 @@ async function updateXp(
     }
 
     // Update user data
-    data.member.exp = newXp;
-    await data.member.save();
+    console.log(data);
+    await axios({
+        url: `http://localhost:${process.env.PORT || 3000}/member`,
+        method: "post",
+        params: {
+            id: data.member.id,
+            guildID: data.member.guildID,
+        },
+        data: {
+            exp: newXp,
+        },
+    });
 }
 
 async function getPrefix(

@@ -2,11 +2,11 @@
 import { Client, Collection, ClientOptions, Guild } from "discord.js";
 import Config from "../config";
 import logger from "./logger";
-import guild from "./Guild";
-import { Member } from "./Member";
+import { guild } from "./Guild";
+import Member from "./Member";
 import user from "./User";
 import path from "path";
-import log from "./DBLog";
+import { log } from "./DBLog";
 import util from "util";
 import axios from "axios";
 /**
@@ -52,7 +52,7 @@ class Plex extends Client {
             guild: new Collection(),
         };
     }
-    clearCache() {
+    async clearCache() {
         this.dbCache.member.clear;
         this.dbCache.user.clear;
         this.dbCache.guild.clear;
@@ -80,7 +80,7 @@ class Plex extends Client {
     async findOrCreateUser({ id: id }) {
         return new Promise(async (res) => {
             if (this.dbCache.user.get(id)) {
-                res(this.dbCache.user.get(id));
+                return res(this.dbCache.user.get(id));
             } else {
                 const data = await axios({
                     method: "get",
@@ -91,7 +91,7 @@ class Plex extends Client {
                 });
                 if (data.status === 200) {
                     this.dbCache.user.set(id, data);
-                    res(data.data);
+                    return res(data.data);
                 } else {
                     const newData = await axios({
                         method: "post",
@@ -100,9 +100,9 @@ class Plex extends Client {
                             id: id,
                         },
                     });
-                    if (newData.status !== 200) res(null);
+                    if (newData.status !== 200) return res(null);
                     this.dbCache.user.set(id, newData.data);
-                    res(newData.data);
+                    return res(newData.data);
                 }
             }
         });
@@ -110,7 +110,7 @@ class Plex extends Client {
     async findOrCreateMember({ id: id, guildID }) {
         return new Promise(async (res) => {
             if (this.dbCache.member.get(`${id}${guildID}`)) {
-                res(this.dbCache.member.get(`${id}${guildID}`));
+                return res(this.dbCache.member.get(`${id}${guildID}`));
             } else {
                 const data = await axios({
                     method: "get",
@@ -122,7 +122,7 @@ class Plex extends Client {
                 });
                 if (data.status === 200) {
                     this.dbCache.member.set(`${id}${guildID}`, data);
-                    res(data.data);
+                    return res(data.data);
                 } else {
                     const newData = await axios({
                         method: "post",
@@ -131,23 +131,10 @@ class Plex extends Client {
                             id: id,
                         },
                     });
-                    if (newData.status !== 200) res(null);
+                    if (newData.status !== 200) return res(null);
                     const guild: any = await this.findOrCreateGuild({ id: guildID });
-                    if (guild) {
-                        const mData = guild.members.push(newData.data._id);
-                        await axios({
-                            method: "put",
-                            url: `http://localhost:${process.env.PORT || 3000}/guild`,
-                            params: {
-                                id: guildID,
-                            },
-                            data: {
-                                members: mData,
-                            },
-                        });
-                    }
                     this.dbCache.member.set(`${id}${guildID}`, newData.data);
-                    res(newData.data);
+                    return res(newData.data);
                 }
             }
         });
@@ -157,7 +144,7 @@ class Plex extends Client {
     async findOrCreateGuild({ id: guildID }) {
         return new Promise(async (res) => {
             if (this.dbCache.guild.get(guildID)) {
-                res(this.dbCache.guild.get(guildID));
+                return res(this.dbCache.guild.get(guildID));
             } else {
                 const data = await axios({
                     method: "get",
@@ -168,7 +155,7 @@ class Plex extends Client {
                 });
                 if (data.status === 200) {
                     this.dbCache.guild.set(guildID, data.data);
-                    res(data.data);
+                    return res(data.data);
                 } else {
                     const newData = await axios({
                         method: "post",
@@ -177,9 +164,9 @@ class Plex extends Client {
                             id: guildID,
                         },
                     });
-                    if (newData.status !== 200) res(null);
+                    if (newData.status !== 200) return res(null);
                     this.dbCache.user.set(guildID, newData.data);
-                    res(newData.data);
+                    return res(newData.data);
                 }
             }
         });

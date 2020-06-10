@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Member } from "../main/Member";
+import Member from "../main/Member";
 import Logger from "../main/logger";
 const logger = new Logger();
 export const createMember = async (req: Request, res: Response) => {
