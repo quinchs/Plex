@@ -1,4 +1,5 @@
 import Plex from "../main/Plex";
+
 module.exports = class {
     client: Plex;
 
