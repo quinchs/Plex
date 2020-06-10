@@ -1,14 +1,23 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
-import Discord from "discord.js";
 import dotenv from "dotenv";
-import mongnpoDB from "mongodb";
 import mongoose from "mongoose";
-import Main from "./main/main";
+import Plex from "./main/Plex";
 import { readdir } from "fs";
 import { join } from "path";
+import express from "express";
+import * as user from "./controllers/user";
+import * as member from "./controllers/member";
+import * as guild from "./controllers/guild";
+import parser from "body-parser";
+
 dotenv.config();
+
 const dev = process.env.dev ? true : false;
-const client = new Main({ partials: ["MESSAGE", "CHANNEL", "REACTION"] }, dev);
+
+const client = new Plex(dev, { partials: ["MESSAGE", "CHANNEL", "REACTION"] });
+
+export const app = express();
+
 const start = async () => {
     readdir(join(__dirname, "./commands"), (_, files: string[]) => {
         client.logger.log(`Loading a total of ${files.length} categories.`, "log");
@@ -26,9 +35,10 @@ const start = async () => {
         });
     });
     // Then we load events, which will include our message and ready event.
-    readdir(join(__dirname, "./events"), (err, files: string[]) => {
+    readdir(join(__dirname, "./events"), (_, files: string[]) => {
         client.logger.log(`Loading a total of ${files.length} events.`, "log");
         files.forEach((file) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const eventName: any = file.split(".")[0];
             client.logger.log(`Loading Event: ${eventName}`);
             const event = new (require(join(__dirname, `./events/${file}`)))(client);
@@ -47,14 +57,33 @@ const start = async () => {
         .catch((err) => {
             console.error(err);
         });
+
+    app.set("port", process.env.PORT || "3000");
+    app.listen(app.get("port"), () => {
+        client.logger.log("REST Api ready");
+    });
+    app.get("/", parser.json(), () => console.log("test"));
+    app.post("/user", user.createUser);
+    app.get("/user", user.findUser);
+    app.put("/user", parser.json(), user.updateUser);
+    app.delete("/user", user.deleteUser);
+    app.post("/member", member.createMember);
+    app.get("/member", member.findMember);
+    app.put("/member", parser.json(), member.updateMember);
+    app.delete("/member", member.deleteMember);
+    app.post("/guild", guild.createGuild);
+    app.get("/guild", guild.findGuild);
+    app.put("/guild", parser.json(), guild.updateGuild);
+    app.delete("/guild", guild.deleteGuild);
 };
 
 start();
 client
     .on("disconnect", () => client.logger.log("Bot is disconnecting...", "warn"))
-    .on("error", (e) => client.logger.log(e, "error"))
-    .on("warn", (info) => client.logger.log(info, "warn"));
+    .on("error", (e: any) => client.logger.log(e, "error"))
+    .on("warn", (info: string) => client.logger.log(info, "warn"))
+    .on("debug", (db: string) => client.logger.log(db, "debug"));
 
-process.on("unhandledRejection", (err) => {
-    console.error(err);
+process.on("unhandledRejection", (err: string) => {
+    client.logger.log(err, "error");
 });

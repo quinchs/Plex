@@ -1,5 +1,4 @@
 import { Guild, GuildMember, MessageEmbed } from "discord.js";
-
 module.exports = class {
     client: any;
     constructor(client) {
@@ -7,8 +6,8 @@ module.exports = class {
     }
     async run(guild: Guild) {
         guild = await guild.fetch();
-        const userData = this.client.findOrCreateUser({ id: guild.ownerID });
-        const guildData = this.client.findOrCreateGuild({ id: guild.id });
+        await this.client.findOrCreateUser({ id: guild.ownerID });
+        await this.client.findOrCreateGuild({ id: guild.id });
         const welcomeMessage = new MessageEmbed();
         welcomeMessage
             .setTitle("Thanks For adding me!")
@@ -16,7 +15,7 @@ module.exports = class {
         const owner: GuildMember = guild.owner as GuildMember;
         owner.send(welcomeMessage);
         return this.client.logger.log(
-            `Joined a new server ${guild.name}. Now Serving ${this.client.guild.cache.size} servers with ${this.client.users.cache.size}`,
+            `Joined a new server ${guild.name}. Now Serving ${this.client.guilds.cache.size} servers with ${this.client.users.cache.size}`,
             "log"
         );
     }

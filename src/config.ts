@@ -22,11 +22,23 @@ export = {
         upArrow: "🔼",
         downArrow: "🔽",
     },
-    botname: "ub",
+    botname: "Plex",
     status: [
         {
-            name: "Watching {serversCount} servers",
-            type: "LISTENING",
+            name: "{serversCount} servers",
+            type: "WATCHING",
         },
     ],
+    colors: {
+        darkRed: "#922B21",
+        red: "#C0392B  ",
+        lightRed: "#FF2D00",
+        brown: "##6E2C00",
+        orange: "#FF6800",
+        yellow: "#F4D03F",
+        green: "#27AE60 ",
+        lightBlue: "#00FFDC",
+        blue: "#1327D6",
+        purple: "#9E13D6",
+    },
 };
