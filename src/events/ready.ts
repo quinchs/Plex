@@ -1,16 +1,13 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
-import Disocrd from "discord.js";
-
+import Plex from "../main/Plex";
 module.exports = class {
-    client: any;
+    client: Plex;
     constructor(client) {
         this.client = client;
     }
 
     async run() {
         const client = this.client;
-
-        // Logs some informations using the logger file
         client.logger.log(`Loading a total of ${client.commands.size} command(s).`, "log");
         client.logger.log(
             `${client.user.tag}, ready to serve ${client.users.cache.size} users in ${client.guilds.cache.size} servers.`,

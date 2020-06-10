@@ -1,23 +1,17 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 const xpCooldown = {};
-module.exports = class {
-    client: any;
-    data: {
-        guild: any;
-        member: any;
-        user: any;
-    };
+import Plex from "../main/Plex";
+import { Message, GuildChannel, TextChannel } from "discord.js";
 
-    constructor(client) {
+module.exports = class {
+    client: Plex;
+    data: any;
+    constructor(client: Plex) {
         this.client = client;
-        this.data = {
-            guild: {},
-            member: {},
-            user: {},
-        };
     }
-    async run(message) {
+    async run(message: Message) {
         if (message.author.bot) return;
 
         if (message.guild && !message.member) {
@@ -42,7 +36,6 @@ module.exports = class {
         }
         const userData = await this.client.findOrCreateUser({ id: message.author.id });
         this.data.user = userData;
-
         if (message.guild) {
             await updateXp(message, this.data);
         }
@@ -51,7 +44,8 @@ module.exports = class {
             !this.data.guild.plugins.autoMod.ignored.includes(message.channel.id)
         ) {
             if (/(discord\.(gg|io|me|li)\/.+|discordapp\.com\/invite\/.+)/i.test(message.content)) {
-                if (!message.channel.permissionsFor(message.member).has("MANAGE_MESSAGES")) {
+                const channel = message.channel as GuildChannel;
+                if (!channel.permissionsFor(message.member).has("MANAGE_MESSAGES")) {
                     this.client.logger.log(
                         `Auto moderated a message. Message: ${message.content}. Server: ${message.guild.name}. User: ${message.author.tag}`,
                         "warn"
@@ -67,9 +61,8 @@ module.exports = class {
             await this.data.user.save();
             message.channel.send(`Afk turned off for ${message.author.tag}`);
         }
-
         message.mentions.users.forEach(async (u) => {
-            const userData = await this.client.findOrCreateUser({ id: u.id });
+            const userData: any = await this.client.findOrCreateUser({ id: u.id });
             if (userData.afk) {
                 message.channel.send("That user is afk");
             }
@@ -94,12 +87,13 @@ module.exports = class {
         }
 
         if (message.guild) {
+            const channel = message.channel as GuildChannel;
             let neededPermission = [];
             if (!cmd.conf.botPermissions.includes("EMBED_LINKS")) {
                 cmd.conf.botPermissions.push("EMBED_LINKS");
             }
             cmd.conf.botPermissions.forEach((perm) => {
-                if (!message.channel.permissionsFor(message.guild.me).has(perm)) {
+                if (!channel.permissionsFor(message.guild.me).has(perm)) {
                     neededPermission.push(perm);
                 }
             });
@@ -109,7 +103,7 @@ module.exports = class {
                         neededPermission.map((p) => `\`${p}\``).join(", ")
                 );
                 return this.client.logger.log(
-                    `Unable to send a message due to permision constrants. Command: ${
+                    `Unable to send a message due to permission constraints. Command: ${
                         message.content
                     }. Needed Perms: ${neededPermission}. User: ${message.author.tag}. ${
                         message.guild ? message.guild.name : "In dms"
@@ -119,7 +113,7 @@ module.exports = class {
             }
             neededPermission = [];
             cmd.conf.memberPermissions.forEach((perm) => {
-                if (!message.channel.permissionsFor(message.member).has(perm)) {
+                if (!channel.permissionsFor(message.member).has(perm)) {
                     neededPermission.push(perm);
                 }
             });
@@ -154,7 +148,7 @@ module.exports = class {
             }
 
             if (
-                !message.channel.permissionsFor(message.member).has("MENTION_EVERYONE") &&
+                !channel.permissionsFor(message.member).has("MENTION_EVERYONE") &&
                 (message.content.includes("@everyone") || message.content.includes("@here"))
             ) {
                 message.channel.send(
@@ -169,7 +163,7 @@ module.exports = class {
                     "warn"
                 );
             }
-            if (!message.channel.nsfw && cmd.conf.nsfw) {
+            if (!(channel as TextChannel).nsfw && cmd.conf.nsfw) {
                 message.channel.send(
                     "You must go to in a channel that allows the NSFW to type this command!"
                 );
@@ -231,7 +225,7 @@ async function updateXp(
     msg: { author: { id: string | number } },
     data: { guild?: any; member?: any; user?: any }
 ) {
-    // Gets the user informations
+    // Gets the user information
     const points: number = parseInt(data.member.exp);
     const level: number = parseInt(data.member.level);
 
@@ -263,7 +257,11 @@ async function updateXp(
     await data.member.save();
 }
 
-async function getPrefix(message, data, client) {
+async function getPrefix(
+    message: { channel: { type: string }; client: { user: { id: any } }; content: string },
+    data: { guild: any; member?: any; user?: any },
+    client: { config: { botname: any } }
+) {
     if (message.channel.type !== "dm") {
         const prefixes = [`<@${message.client.user.id}>`, client.config.botname, data.guild.prefix];
         let prefix = null;

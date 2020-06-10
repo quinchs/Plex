@@ -1,7 +1,7 @@
 import { bgBlue, black, green } from "chalk";
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function dateTimePad(value: any, digits: number) {
+function dateTimePad(value: string | number, digits: number) {
     let number = value;
     while (number.toString().length < digits) {
         number = "0" + number;
@@ -28,9 +28,8 @@ function format(tDate: Date) {
     );
 }
 
-class Logger {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    static log(content: any, type = "log") {
+export default class Logger {
+    public log(content: string, type = "log") {
         const date = `[${format(new Date(Date.now()))}]:`;
         switch (type) {
             // Check the message type and then print him in the console
@@ -52,11 +51,13 @@ class Logger {
             case "ready": {
                 return console.log(`${date} ${black.bgGreen(type.toUpperCase())} ${content}`);
             }
+            case "rest": {
+                return console.log(`${date} ${black.bgMagenta(type.toUpperCase())} ${content}`);
+            }
             default:
                 throw new TypeError(
-                    "Logger type must be either warn, debug, log, ready, cmd or error."
+                    "Logger type must be either warn, debug, log, ready, cmd, rest, or error."
                 );
         }
     }
 }
-export default Logger;

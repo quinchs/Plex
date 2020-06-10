@@ -1,15 +1,24 @@
-import mongoose from "mongoose";
+import { prop, getModelForClass } from "@typegoose/typegoose";
 
-const userSchema = new mongoose.Schema({
+export class UserClass {
     /* REQUIRED */
-    id: { type: String }, // Discord ID of the user
+    @prop()
+    public id: string; // Discord ID of the user
+
     /* ECONOMY (GLOBAL) */
-    rep: { type: Number, default: 0 }, // Reputation points of the user
-    birthdate: { type: Number }, // Birthdate of the user (the timestamp)
+    @prop({ default: 0 })
+    public rep: number; // Reputation points of the user
+
+    @prop()
+    public birthdate: number; // Birthdate of the user (the timestamp)
     /* STATS */
-    registeredAt: { type: Number, default: Date.now() }, // Registered date of the user
-    /* OTHER INFORMATIONS */
-    afk: { type: String, default: null }, // Whether the member is AFK
-});
-const a = mongoose.model("User", userSchema);
-export default a;
+
+    @prop({ default: Date.now })
+    public registeredAt: number; // Registered date of the user
+
+    /* OTHER INFORMATION */
+    @prop({ default: null })
+    public afk: string; // Whether the member is AFK
+}
+const User = getModelForClass(UserClass);
+export default User;
