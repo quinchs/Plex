@@ -25,10 +25,10 @@ class DBLogClass {
     @prop({ default: Date.now() })
     public date: number;
 
-    @prop({ default: author })
+    @prop()
     public author: author;
 
-    @prop({ default: guild })
+    @prop()
     public guild: guild;
 }
 const DBLog = getModelForClass(DBLogClass);

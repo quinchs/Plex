@@ -11,7 +11,7 @@ module.exports = class {
 
         await this.client.findOrCreateGuild({ id: guild.id });
 
-        const memberData = await this.client.findOrCreateMember({
+        const memberData: any = await this.client.findOrCreateMember({
             id: member.id,
             guildID: guild.id,
         });

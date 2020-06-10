@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Guild from "../main/guild";
+import Guild from "../main/Guild";
 import Logger from "../main/logger";
 const logger = new Logger();
 export const createGuild = async (req: Request, res: Response) => {

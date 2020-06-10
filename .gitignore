@@ -1,5 +1,5 @@
 # Built Files
-build/
+dist/
 
 # Yarn Lock
 yarn.lock
