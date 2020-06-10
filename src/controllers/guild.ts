@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Guild from "../main/Guild";
+import { guild as Guild } from "../main/Guild";
 import Logger from "../main/logger";
 const logger = new Logger();
 export const createGuild = async (req: Request, res: Response) => {
@@ -21,7 +21,7 @@ export const createGuild = async (req: Request, res: Response) => {
 export const findGuild = async (req: Request, res: Response) => {
     logger.log(`GET Request made at ${req.originalUrl}`, "rest");
     if (!req.query.id) return res.status(400).send("Invalid User ID");
-    const user = await Guild.findOne({ id: req.query.id });
+    const user = await Guild.findOne({ id: req.query.id }).populate("members");
     if (user) return res.status(200).send(user);
     return res.status(404).send("No data found from the requested User ID");
 };
