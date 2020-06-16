@@ -55,11 +55,11 @@ const start = async () => {
         .connect(process.env.db, { useNewUrlParser: true, useUnifiedTopology: true })
         .then(() => {
             client.logger.log("Connected to the Mongodb database.", "log");
+            mongoose.set("useFindAndModify", false);
         })
         .catch((err) => {
             console.error(err);
         });
-
     app.set("port", process.env.PORT || "3000");
     app.listen(app.get("port"), () => {
         client.logger.log("REST Api ready");
@@ -77,7 +77,6 @@ const start = async () => {
     app.get("/guild", guild.findGuild);
     app.put("/guild", parser.json(), guild.updateGuild);
     app.delete("/guild", guild.deleteGuild);
-    client.clearCache();
 };
 
 start();

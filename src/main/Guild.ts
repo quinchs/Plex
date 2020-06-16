@@ -11,23 +11,14 @@ export const guild = mongoose.model(
         prefix: { type: String, default: config.prefix }, // Default or custom prefix of the
         ignoredChannels: { type: Array, default: [] }, // Channels ignored by the bot
         commands: { type: Array, default: [] }, // Commands logs
-        autoDeleteModCommands: { type: Boolean, default: false }, // Whether to auto delete moderation commands // Disabled categories
+        autoDeleteModCommands: { type: Boolean, default: false }, // Whether to auto delete moderation commands
+        nickname: { type: String, default: "Plex" },
+        autoResponses: { type: Array, default: [] },
         plugins: {
             type: Object,
             default: {
-                modlogs: false,
-                logs: {
-                    location: false,
-                    level: 1,
-                },
                 autoRole: {
-                    enabled: false,
                     role: null,
-                },
-                autoMod: {
-                    enabled: false,
-                    ignored: [],
-                    level: 1,
                 },
                 warnLimits: {
                     kick: false,
@@ -37,6 +28,114 @@ export const guild = mongoose.model(
                 suggestions: false,
             },
         },
+        autoMod: {
+            type: Object,
+            default: {
+                blockedWordsEnabled: {
+                    delete: false,
+                    warn: false,
+                    autoMute: false,
+                },
+                blockedWords: [
+                    "nigg",
+                    "fuck",
+                    "fuk",
+                    "cunt",
+                    "cnut",
+                    "bitch",
+                    "dick",
+                    "d1ck",
+                    "pussy",
+                    "asshole",
+                    "b1tch",
+                    "b!tch",
+                    "blowjob",
+                    "cock",
+                    "c0ck",
+                ],
+                allCaps: {
+                    delete: false,
+                    warn: false,
+                    autoMute: false,
+                },
+                msgSpam: {
+                    delete: false,
+                    warn: false,
+                    autoMute: false,
+                },
+                invites: {
+                    delete: false,
+                    warn: false,
+                    autoMute: false,
+                },
+                links: {
+                    delete: false,
+                    warn: false,
+                    autoMute: false,
+                },
+                massMentions: {
+                    delete: false,
+                    warn: false,
+                    autoMute: false,
+                    ban: false,
+                },
+                emojiSpam: {
+                    delete: false,
+                    warn: false,
+                    autoMute: false,
+                },
+                spoilers: {
+                    delete: false,
+                    warn: false,
+                    autoMute: false,
+                },
+                autoMuteTime: 600000,
+                maxEmoji: 4,
+                massMention: 7,
+                allowedRoles: [],
+                ignoredChannels: [],
+            },
+        },
+        logs: {
+            type: Object,
+            default: {
+                specifyChanel: false,
+                join: false,
+                leave: false,
+                nicknameUpdate: false,
+                ban: false,
+                unBan: false,
+                kick: false,
+                roleAdd: false,
+                roleDelete: false,
+                roleUpdate: false,
+                roleGiven: false,
+                roleRemoved: false,
+                emojiAdd: false,
+                emojiDelete: false,
+                emojiUpdate: false,
+                messageEdit: false,
+                bulkMessageDelete: false,
+                channelCreate: false,
+                channelDelete: false,
+                channelUpdate: false,
+                modCommand: false,
+                joinVc: false,
+                leaveVc: false,
+                moveVc: false,
+                inviteCreate: false,
+            },
+        },
+        commandData: {
+            type: Object,
+            default: {},
+        } /* data like
+        <commandName>: {
+            allowedRole: [],
+            blockedRole: [],
+            blockedChannels: [],
+        }
+        */,
         caseCount: { type: Number, default: 0 },
     })
 );

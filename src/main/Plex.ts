@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Client, Collection, ClientOptions, Guild } from "discord.js";
+import { Client, Collection, ClientOptions, Guild, GuildMember } from "discord.js";
 import Config from "../config";
 import logger from "./logger";
 import { guild } from "./Guild";
@@ -9,6 +9,22 @@ import path from "path";
 import { log } from "./DBLog";
 import util from "util";
 import axios from "axios";
+import io from "@pm2/io";
+declare module "discord.js" {
+    interface ClientEvents {
+        warnMember: [GuildMember];
+        muteMember: [
+            {
+                member: GuildMember;
+                muter: GuildMember;
+                time: number;
+                reason: string;
+            }
+        ];
+        kickMember: [GuildMember, string];
+        banMember: [GuildMember, string];
+    }
+}
 /**
  * This is the bots main client that extends discords client.
  * @extends {Client}
@@ -18,23 +34,26 @@ class Plex extends Client {
     commands: Collection<any, any>;
     aliases: Collection<any, any>;
     guildData: import("mongoose").Model<import("mongoose").Document, {}>;
-    dbCache: {
-        member: Collection<any, any>;
-        user: Collection<any, any>;
-        guild: Collection<any, any>;
-    };
     userData: import("mongoose").Model<import("mongoose").Document, {}>;
     logger: logger;
     dev: boolean;
     logs: any;
     memberData: any;
     wait: { (ms: number): Promise<void>; <T>(ms: number, value: T): Promise<T> };
+    commandCount: any;
+    messages: any;
     /**
      * @param {ClientOptions} [ClientOptions]
      * @param {boolean} Dev
      */
     constructor(dev: boolean, options?: ClientOptions) {
         super(options);
+        this.messages = io.counter({
+            name: "Messages Seen",
+        });
+        this.commandCount = io.counter({
+            name: "Commands sent",
+        });
         this.logs = log;
         this.config = Config;
         this.commands = new Collection();
@@ -45,18 +64,14 @@ class Plex extends Client {
         this.userData = user;
         this.dev = dev;
         this.wait = util.promisify(setTimeout);
+    }
+    async addCommandSeen() {
+        this.commandCount.inc();
+    }
+    async addMessageSeen() {
+        this.messages.inc();
+    }
 
-        this.dbCache = {
-            member: new Collection(),
-            user: new Collection(),
-            guild: new Collection(),
-        };
-    }
-    async clearCache() {
-        this.dbCache.member.clear;
-        this.dbCache.user.clear;
-        this.dbCache.guild.clear;
-    }
     // This function is used to load a command and add it to the collection
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     loadCommand(commandPath: any, commandName: any) {
@@ -79,63 +94,52 @@ class Plex extends Client {
 
     async findOrCreateUser({ id: id }) {
         return new Promise(async (res) => {
-            if (this.dbCache.user.get(id)) {
-                return res(this.dbCache.user.get(id));
+            const data = await axios({
+                method: "get",
+                url: `http://localhost:${process.env.PORT || 3000}/user`,
+                params: {
+                    id: id,
+                },
+            });
+            if (data.status === 200) {
+                return res(data.data);
             } else {
-                const data = await axios({
-                    method: "get",
+                const newData = await axios({
+                    method: "post",
                     url: `http://localhost:${process.env.PORT || 3000}/user`,
                     params: {
                         id: id,
                     },
                 });
-                if (data.status === 200) {
-                    this.dbCache.user.set(id, data);
-                    return res(data.data);
-                } else {
-                    const newData = await axios({
-                        method: "post",
-                        url: `http://localhost:${process.env.PORT || 3000}/user`,
-                        params: {
-                            id: id,
-                        },
-                    });
-                    if (newData.status !== 200) return res(null);
-                    this.dbCache.user.set(id, newData.data);
-                    return res(newData.data);
-                }
+                if (newData.status !== 200) return res(null);
+                return res(newData.data);
             }
         });
     } // This function is used to find a member data or create it
     async findOrCreateMember({ id: id, guildID }) {
         return new Promise(async (res) => {
-            if (this.dbCache.member.get(`${id}${guildID}`)) {
-                return res(this.dbCache.member.get(`${id}${guildID}`));
+            const data = await axios({
+                method: "get",
+                url: `http://localhost:${process.env.PORT || 3000}/member`,
+                params: {
+                    id: id,
+                    guildID: guildID,
+                },
+            });
+            if (data.status === 200) {
+                return res(data.data);
             } else {
-                const data = await axios({
-                    method: "get",
-                    url: `http://localhost:${process.env.PORT || 3000}/member`,
+                const newData = await axios({
+                    method: "post",
+                    url: `http://localhost:${process.env.PORT || 3000}/user`,
                     params: {
                         id: id,
                         guildID: guildID,
                     },
                 });
-                if (data.status === 200) {
-                    this.dbCache.member.set(`${id}${guildID}`, data);
-                    return res(data.data);
-                } else {
-                    const newData = await axios({
-                        method: "post",
-                        url: `http://localhost:${process.env.PORT || 3000}/user`,
-                        params: {
-                            id: id,
-                        },
-                    });
-                    if (newData.status !== 200) return res(null);
-                    const guild: any = await this.findOrCreateGuild({ id: guildID });
-                    this.dbCache.member.set(`${id}${guildID}`, newData.data);
-                    return res(newData.data);
-                }
+                if (newData.status !== 200) return res(null);
+                await this.findOrCreateGuild({ id: guildID });
+                return res(newData.data);
             }
         });
     }
@@ -143,31 +147,25 @@ class Plex extends Client {
     // This function is used to find a guild data or create it
     async findOrCreateGuild({ id: guildID }) {
         return new Promise(async (res) => {
-            if (this.dbCache.guild.get(guildID)) {
-                return res(this.dbCache.guild.get(guildID));
+            const data = await axios({
+                method: "get",
+                url: `http://localhost:${process.env.PORT || 3000}/guild`,
+                params: {
+                    id: guildID,
+                },
+            });
+            if (data.status === 200) {
+                return res(data.data);
             } else {
-                const data = await axios({
-                    method: "get",
+                const newData = await axios({
+                    method: "post",
                     url: `http://localhost:${process.env.PORT || 3000}/guild`,
                     params: {
                         id: guildID,
                     },
                 });
-                if (data.status === 200) {
-                    this.dbCache.guild.set(guildID, data.data);
-                    return res(data.data);
-                } else {
-                    const newData = await axios({
-                        method: "post",
-                        url: `http://localhost:${process.env.PORT || 3000}/guild`,
-                        params: {
-                            id: guildID,
-                        },
-                    });
-                    if (newData.status !== 200) return res(null);
-                    this.dbCache.user.set(guildID, newData.data);
-                    return res(newData.data);
-                }
+                if (newData.status !== 200) return res(null);
+                return res(newData.data);
             }
         });
     }
