@@ -2,7 +2,7 @@
 import Plex from "../main/Plex";
 module.exports = class {
     client: Plex;
-    constructor(client) {
+    constructor(client: Plex) {
         this.client = client;
     }
 
@@ -10,7 +10,9 @@ module.exports = class {
         const client = this.client;
         client.logger.log(`Loading a total of ${client.commands.size} command(s).`, "log");
         client.logger.log(
-            `${client.user.tag}, ready to serve ${client.users.cache.size} users in ${client.guilds.cache.size} servers.`,
+            `${client.user.tag}, ready to serve ${client.users.cache.size} users in ${
+                client.guilds.cache.size
+            } servers. Loaded in ${process.uptime()}ms`,
             "ready"
         );
         const status = client.config.status,

@@ -7,6 +7,7 @@
         "cooldowns",
         "devs",
         "discordapp",
+        "regx",
         "typegoose"
     ]
 }
