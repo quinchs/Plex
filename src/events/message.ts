@@ -3,6 +3,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 const xpCooldown = {};
 const chatCooldown = {};
+const cmdCooldown = {};
+const msgCache = [];
 import Plex from "../main/Plex";
 import { Message, GuildChannel, TextChannel } from "discord.js";
 import axios from "axios";
@@ -43,9 +45,6 @@ module.exports = class {
         }
         const userData = await this.client.findOrCreateUser({ id: message.author.id });
         this.data.user = userData;
-        if (message.guild) {
-            await updateXp(message, this.data);
-        }
         if (
             message.guild &&
             (this.data.guild.autoMod.msgSpam.delete ||
@@ -58,10 +57,10 @@ module.exports = class {
             setTimeout(function () {
                 chatCooldown[message.author.id + ":" + message.guild.id]--;
             }, 3500);
-            if (chatCooldown[message.author.id + ":" + message.guild.id] > 4) {
+            if (chatCooldown[message.author.id + ":" + message.guild.id] > 3) {
                 this.data.guild.autoMod.msgSpam.delete ? await message.delete() : null;
                 this.data.guild.autoMod.msgSpam.warn
-                    ? this.client.emit("warnMember", message.member)
+                    ? this.client.emit("warnMember", message.member, "Autowarned for spamming")
                     : null;
                 this.data.guild.autoMod.msgSpam.autoMute
                     ? this.client.emit("muteMember", {
@@ -71,6 +70,7 @@ module.exports = class {
                           reason: `Automuted for ${this.data.guild.autoMod.autoMuteTime} due to spamming`,
                       })
                     : null;
+                return;
             }
         }
 
@@ -90,16 +90,21 @@ module.exports = class {
                         ? await message.delete()
                         : null;
                     this.data.guild.autoMod.blockedWordsEnabled.warn
-                        ? this.client.emit("warnMember", message.member)
+                        ? this.client.emit(
+                              "warnMember",
+                              message.member,
+                              "Autowarned for saying a blocked message"
+                          )
                         : null;
                     this.data.guild.autoMod.blockedWordsEnabled.autoMute
                         ? this.client.emit("muteMember", {
                               member: message.member,
                               muter: message.guild.me,
                               time: this.data.guild.autoMod.autoMuteTime,
-                              reason: `Automuted for ${this.data.guild.autoMod.autoMuteTime} due to sending a message in all caps`,
+                              reason: `Automuted for ${this.data.guild.autoMod.autoMuteTime} due to saying a blocked word`,
                           })
                         : null;
+                    return;
                 }
             }
             if (
@@ -113,16 +118,21 @@ module.exports = class {
                 ) {
                     this.data.guild.autoMod.allCaps.delete ? await message.delete() : null;
                     this.data.guild.autoMod.allCaps.warn
-                        ? this.client.emit("warnMember", message.member)
+                        ? this.client.emit(
+                              "warnMember",
+                              message.member,
+                              "Autowarned for posing a message in all caps"
+                          )
                         : null;
                     this.data.guild.autoMod.allCaps.autoMute
                         ? this.client.emit("muteMember", {
                               member: message.member,
                               muter: message.guild.me,
                               time: this.data.guild.autoMod.autoMuteTime,
-                              reason: `AutoMuted for ${this.data.guild.autoMod.autoMuteTime} due to saying a blocked word`,
+                              reason: `AutoMuted for ${this.data.guild.autoMod.autoMuteTime} due to sending a message in all caps`,
                           })
                         : null;
+                    return;
                 }
             }
             if (
@@ -130,12 +140,16 @@ module.exports = class {
                 this.data.guild.autoMod.invites.warn ||
                 this.data.guild.autoMod.invites.autoMute
             ) {
-                const regx = /(([a-z]+:\/\/)?(([a-z0-9\-]+\.)+([a-z]{2}|aero|arpa|biz|com|coop|edu|gov|info|int|jobs|mil|museum|name|nato|net|org|pro|travel|local|internal))(:[0-9]{1,5})?(\/[a-z0-9_\-\.~]+)*(\/([a-z0-9_\-\.]*)(\?[a-z0-9+_\-\.%=&amp;]*)?)?(#[a-zA-Z0-9!$&'()*+.=-_~:@/?]*)?)(\s+|$)/gi;
+                const regx = /^((?:https?:)?\/\/)?((?:www|m)\.)? ((?:discord\.gg|discordapp\.com))/gi;
                 const link = regx.test(message.content.toLowerCase().replace(/\s+/g, ""));
                 if (link) {
                     this.data.guild.autoMod.invites.delete ? await message.delete() : null;
                     this.data.guild.autoMod.invites.warn
-                        ? this.client.emit("warnMember", message.member)
+                        ? this.client.emit(
+                              "warnMember",
+                              message.member,
+                              "Autowarned for posting a invite"
+                          )
                         : null;
                     this.data.guild.autoMod.invites.autoMute
                         ? this.client.emit("muteMember", {
@@ -145,6 +159,7 @@ module.exports = class {
                               reason: `AutoMuted for ${this.data.guild.autoMod.autoMuteTime} due to posting a link`,
                           })
                         : null;
+                    return;
                 }
             }
             if (
@@ -152,12 +167,16 @@ module.exports = class {
                 this.data.guild.autoMod.links.warn ||
                 this.data.guild.autoMod.links.autoMute
             ) {
-                const regx = /^((?:https?:)?\/\/)?((?:www|m)\.)? ((?:discord\.gg|discordapp\.com))/gi;
+                const regx = /(([a-z]+:\/\/)?(([a-z0-9\-]+\.)+([a-z]{2}|aero|arpa|biz|com|coop|edu|gov|info|int|jobs|mil|museum|name|nato|net|org|pro|travel|local|internal))(:[0-9]{1,5})?(\/[a-z0-9_\-\.~]+)*(\/([a-z0-9_\-\.]*)(\?[a-z0-9+_\-\.%=&amp;]*)?)?(#[a-zA-Z0-9!$&'()*+.=-_~:@/?]*)?)(\s+|$)/gi;
                 const discordInv = regx.test(message.content.toLowerCase().replace(/\s+/g, ""));
                 if (discordInv) {
                     this.data.guild.autoMod.links.delete ? await message.delete() : null;
                     this.data.guild.autoMod.links.warn
-                        ? this.client.emit("warnMember", message.member)
+                        ? this.client.emit(
+                              "warnMember",
+                              message.member,
+                              "Autowarned for posting a link"
+                          )
                         : null;
                     this.data.guild.autoMod.links.autoMute
                         ? this.client.emit("muteMember", {
@@ -167,6 +186,7 @@ module.exports = class {
                               reason: `AutoMuted for ${this.data.guild.autoMod.autoMuteTime} due to posting a link`,
                           })
                         : null;
+                    return;
                 }
             }
             if (
@@ -179,7 +199,11 @@ module.exports = class {
                 if (emojiCount > this.data.guild.autoMod.maxEmoji) {
                     this.data.guild.autoMod.emojiSpam.delete ? await message.delete() : null;
                     this.data.guild.autoMod.emojiSpam.warn
-                        ? this.client.emit("warnMember", message.member)
+                        ? this.client.emit(
+                              "warnMember",
+                              message.member,
+                              "Autowarned for emoji spam"
+                          )
                         : null;
                     this.data.guild.autoMod.emojiSpam.autoMute
                         ? this.client.emit("muteMember", {
@@ -189,6 +213,7 @@ module.exports = class {
                               reason: `AutoMuted for ${this.data.guild.autoMod.autoMuteTime} due to posting more emojis then the limit`,
                           })
                         : null;
+                    return;
                 }
             }
             if (
@@ -203,7 +228,11 @@ module.exports = class {
                 if (mentions > this.data.guild.autoMod.massMention) {
                     this.data.guild.autoMod.massMentions.delete ? await message.delete() : null;
                     this.data.guild.autoMod.massMentions.warn
-                        ? this.client.emit("warnMember", message.member)
+                        ? this.client.emit(
+                              "warnMember",
+                              message.member,
+                              "Autowarned for mass mentioning"
+                          )
                         : null;
                     this.data.guild.autoMod.massMentions.autoMute
                         ? this.client.emit("muteMember", {
@@ -213,6 +242,7 @@ module.exports = class {
                               reason: `AutoMuted for ${this.data.guild.autoMod.autoMuteTime} due to mass mentioning`,
                           })
                         : null;
+                    return;
                 }
             }
             if (
@@ -225,7 +255,11 @@ module.exports = class {
                 if (spoiler) {
                     this.data.guild.autoMod.spoilers.delete ? await message.delete() : null;
                     this.data.guild.autoMod.spoilers.warn
-                        ? this.client.emit("warnMember", message.member)
+                        ? this.client.emit(
+                              "warnMember",
+                              message.member,
+                              "Autowarned for Sending spoilers"
+                          )
                         : null;
                     this.data.guild.autoMod.spoilers.autoMute
                         ? this.client.emit("muteMember", {
@@ -235,8 +269,56 @@ module.exports = class {
                               reason: `AutoMuted for ${this.data.guild.autoMod.autoMuteTime} due to posting a spoiler`,
                           })
                         : null;
+                    return;
                 }
             }
+            if (
+                this.data.guild.autoMod.repWords.delete ||
+                this.data.guild.autoMod.repWords.warn ||
+                this.data.guild.autoMod.repWords.autoMute
+            ) {
+                const newMsg = {
+                    mID: message.id,
+                    gID: message.guild.id,
+                    aID: message.author.id,
+                    content: message.content,
+                    ts: message.createdTimestamp,
+                };
+                msgCache.push(newMsg);
+                const cachedMessages = msgCache.filter(
+                    (m) => m.aID === message.author.id && m.gID === message.guild.id
+                );
+                const duplicateMatches = cachedMessages.filter(
+                    (m) => m.content === message.content && m.ts > newMsg.ts - 10000
+                );
+                if (duplicateMatches.length > 4) {
+                    this.data.guild.autoMod.repWords.delete
+                        ? duplicateMatches.forEach(async (m) => {
+                              const msg = await message.channel.messages.fetch(m.mID);
+                              await msg.delete();
+                          })
+                        : null;
+                    this.data.guild.autoMod.repWords.warn
+                        ? this.client.emit(
+                              "warnMember",
+                              message.member,
+                              "Autowarned for sending duplicate text"
+                          )
+                        : null;
+                    this.data.guild.autoMod.repWords.autoMute
+                        ? this.client.emit("muteMember", {
+                              member: message.member,
+                              muter: message.guild.me,
+                              time: this.data.guild.autoMod.autoMuteTime,
+                              reason: `AutoMuted for ${this.data.guild.autoMod.autoMuteTime} due to sending duplicate text`,
+                          })
+                        : null;
+                    return;
+                }
+            }
+        }
+        if (message.guild) {
+            await updateXp(message, this.data);
         }
         const afkReason = this.data.user.afk;
         if (afkReason) {
@@ -257,6 +339,9 @@ module.exports = class {
                 message.reply(`<@${u.id}> is afk`);
             }
         });
+        if (this.data.client.autoResponses[message.content]) {
+            return message.channel.send(this.data.client.autoResponses[message.content].response);
+        }
         const prefix: any = await getPrefix(message, this.data, this.client);
         if (!prefix) return;
         const args = message.content
@@ -275,7 +360,22 @@ module.exports = class {
             );
             return message.channel.send("That command is only usable in guilds");
         }
-
+        if (message.guild) {
+            let isBlockedRole = false;
+            message.member.roles.cache.forEach((role) => {
+                if (this.data.guild.commandData[cmd.help.name].blockedRoles.includes(role.id))
+                    isBlockedRole = true;
+            });
+            if (isBlockedRole) return;
+        }
+        if (message.guild) {
+            if (
+                this.data.guild.commandData[cmd.help.name].blockedChannels.includes(
+                    message.channel.id
+                )
+            )
+                return;
+        }
         if (message.guild) {
             const channel = message.channel as GuildChannel;
             let neededPermission = [];
@@ -377,6 +477,21 @@ module.exports = class {
                 "warn"
             );
         }
+        let uCooldown = cmdCooldown[message.author.id];
+        if (!uCooldown) {
+            cmdCooldown[message.author.id] = {};
+            uCooldown = cmdCooldown[message.author.id];
+        }
+        const time = uCooldown[cmd.help.name] || 0;
+        if (time && time > Date.now()) {
+            return message.channel.send(
+                `heyyyyy, enter the chilzone, and wait ${Math.ceil(
+                    (time - Date.now()) / 1000
+                )} to use that command again`
+            );
+        }
+        cmdCooldown[message.author.id][cmd.help.name] =
+            Date.now() + (cmd.conf.cooldown ? cmd.conf.cooldown : 3000);
 
         this.client.logger.log(
             `${message.author.username} (${message.author.id}) ran command ${cmd.help.name}`,
@@ -441,6 +556,7 @@ async function updateXp(
     // check if the member up to the next level
     if (newXp > neededXp) {
         data.member.level = level + 1;
+        data.member.exp = newXp - neededXp;
     }
 
     // Update user data
