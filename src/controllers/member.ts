@@ -6,9 +6,9 @@ export const createMember = async (req: Request, res: Response) => {
     logger.log(`POST Request made at ${req.originalUrl}`, "rest");
     if (!req.query.id || !req.query.guildID)
         return res.status(400).send("Invalid Member ID, or Guild ID");
-    const user = await Member.findOne({ id: req.query.id, guildID: req.query.guildID as string });
+    const user = await Member.findOne({ guildID: req.query.guildID, id: req.query.id });
     if (user) return res.status(200).send(user);
-    Member.create({ id: req.query.uid, guildID: req.query.guildID })
+    Member.create({ guildID: req.query.guildID, id: req.query.id })
         .then((data) => {
             return res.status(200).send(data);
         })
@@ -23,7 +23,7 @@ export const findMember = async (req: Request, res: Response) => {
     logger.log(`GET Request made at ${req.originalUrl}`, "rest");
     if (!req.query.id || !req.query.guildID)
         return res.status(400).send("Invalid Member ID, or Guild ID");
-    const user = await Member.findOne({ id: req.query.id, guildID: req.query.guildID as string });
+    const user = await Member.findOne({ guildID: req.query.guildID, id: req.query.id });
     if (user) return res.status(200).send(user);
     return res.status(404).send("No data found from the requested User ID");
 };
@@ -38,7 +38,7 @@ export const deleteMember = async (req: Request, res: Response) => {
         guildID: req.query.guildID as string,
     });
     if (!userCheck) return res.status(200).send("No data found from the requested User ID");
-    await Member.deleteOne({ id: req.query.id, guildID: req.query.guildID as string }, (e) => {
+    await Member.deleteOne({ id: req.query.id, guildID: req.query.guildID }, (e) => {
         if (!e) {
             return res.status(200).send("Successfully Deleted the User");
         } else return res.status(500).send(e);

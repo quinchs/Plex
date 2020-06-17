@@ -10,10 +10,9 @@ export const guild = mongoose.model(
         members: [{ type: Schema.Types.ObjectId, ref: "Member" }],
         prefix: { type: String, default: config.prefix }, // Default or custom prefix of the
         ignoredChannels: { type: Array, default: [] }, // Channels ignored by the bot
-        commands: { type: Array, default: [] }, // Commands logs
         autoDeleteModCommands: { type: Boolean, default: false }, // Whether to auto delete moderation commands
         nickname: { type: String, default: "Plex" },
-        autoResponses: { type: Array, default: [] },
+        autoResponses: { type: Array, default: {} },
         plugins: {
             type: Object,
             default: {
@@ -89,6 +88,11 @@ export const guild = mongoose.model(
                     warn: false,
                     autoMute: false,
                 },
+                repWords: {
+                    delete: false,
+                    warn: false,
+                    autoMute: false,
+                },
                 autoMuteTime: 600000,
                 maxEmoji: 4,
                 massMention: 7,
@@ -131,7 +135,6 @@ export const guild = mongoose.model(
             default: {},
         } /* data like
         <commandName>: {
-            allowedRole: [],
             blockedRole: [],
             blockedChannels: [],
         }
