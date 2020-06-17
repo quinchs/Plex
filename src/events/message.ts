@@ -339,7 +339,7 @@ module.exports = class {
                 message.reply(`<@${u.id}> is afk`);
             }
         });
-        if (this.data.client.autoResponses[message.content]) {
+        if (this.data.guild.autoResponses[message.content]) {
             return message.channel.send(this.data.client.autoResponses[message.content].response);
         }
         const prefix: any = await getPrefix(message, this.data, this.client);
