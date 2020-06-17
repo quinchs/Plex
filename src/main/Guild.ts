@@ -10,6 +10,7 @@ export const guild = mongoose.model(
         members: [{ type: Schema.Types.ObjectId, ref: "Member" }],
         prefix: { type: String, default: config.prefix }, // Default or custom prefix of the
         ignoredChannels: { type: Array, default: [] }, // Channels ignored by the bot
+        ignoredRoles: { type: Array, default: [] },
         autoDeleteModCommands: { type: Boolean, default: false }, // Whether to auto delete moderation commands
         nickname: { type: String, default: "Plex" },
         autoResponses: { type: Array, default: {} },
@@ -130,15 +131,6 @@ export const guild = mongoose.model(
                 inviteCreate: false,
             },
         },
-        commandData: {
-            type: Object,
-            default: {},
-        } /* data like
-        <commandName>: {
-            blockedRole: [],
-            blockedChannels: [],
-        }
-        */,
         caseCount: { type: Number, default: 0 },
     })
 );

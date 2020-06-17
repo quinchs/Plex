@@ -361,22 +361,6 @@ module.exports = class {
             return message.channel.send("That command is only usable in guilds");
         }
         if (message.guild) {
-            let isBlockedRole = false;
-            message.member.roles.cache.forEach((role) => {
-                if (this.data.guild.commandData[cmd.help.name].blockedRoles.includes(role.id))
-                    isBlockedRole = true;
-            });
-            if (isBlockedRole) return;
-        }
-        if (message.guild) {
-            if (
-                this.data.guild.commandData[cmd.help.name].blockedChannels.includes(
-                    message.channel.id
-                )
-            )
-                return;
-        }
-        if (message.guild) {
             const channel = message.channel as GuildChannel;
             let neededPermission = [];
             if (!cmd.conf.botPermissions.includes("EMBED_LINKS")) {
@@ -436,7 +420,24 @@ module.exports = class {
                     "warn"
                 );
             }
-
+            let blockedRole: string | boolean = false;
+            message.member.roles.cache.forEach((role) => {
+                if (this.data.guild.ignoredRoles.includes(role.id)) return (blockedRole = role.id);
+            });
+            if (blockedRole && !message.member.hasPermission("ADMINISTRATOR")) {
+                message.delete() &&
+                    message.author.send(
+                        `Commands are forbiden from you due to your role: <&${blockedRole}> being blocked in ${message.guild.name}`
+                    );
+                return this.client.logger.log(
+                    `Unable to send a message due to a role being blocked. Command: ${
+                        message.content
+                    }. User: ${message.author.tag}. ${
+                        message.guild ? message.guild.name : "In dms"
+                    }`,
+                    "warn"
+                );
+            }
             if (
                 !channel.permissionsFor(message.member).has("MENTION_EVERYONE") &&
                 (message.content.includes("@everyone") || message.content.includes("@here"))
