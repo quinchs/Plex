@@ -1,4 +1,3 @@
-import dotenv from "dotenv";
 import mongoose from "mongoose";
 import Plex from "./main/Plex";
 import { readdir } from "fs";
@@ -6,12 +5,8 @@ import { join } from "path";
 import express from "express";
 
 const dev = false
-const result = dotenv.config()
 export const app = express();
 const client = new Plex(false, { partials: ["MESSAGE", "CHANNEL", "REACTION"] });
-if (result.error) {
-    throw result.error
-}
 app.listen(app.get("port"), (error) => {
     if(error) throw error
     client.logger.log("REST Api ready");
