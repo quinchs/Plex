@@ -12,7 +12,7 @@ import axios from "axios";
 import io from "@pm2/io";
 declare module "discord.js" {
     interface ClientEvents {
-        warnMember: [GuildMember];
+        warnMember: [GuildMember, string];
         muteMember: [
             {
                 member: GuildMember;
@@ -131,7 +131,7 @@ class Plex extends Client {
             } else {
                 const newData = await axios({
                     method: "post",
-                    url: `http://localhost:${process.env.PORT || 3000}/user`,
+                    url: `http://localhost:${process.env.PORT || 3000}/member`,
                     params: {
                         id: id,
                         guildID: guildID,
