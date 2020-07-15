@@ -47,3 +47,4 @@ mongoose
     });
 client.login(process.env.token)
 
+process.exit(0)
