@@ -8,7 +8,7 @@
         "build": "rm -rf dist/ && tsc",
         "dev": "ts-node-dev ./src/index.ts",
         "prestart": "rm -rf dist/ && tsc",
-        "test": "ts-node-dev"
+        "test": "ts-node-dev ./src/test.ts"
     },
     "heroku-run-build-script": true,
     "repository": {
