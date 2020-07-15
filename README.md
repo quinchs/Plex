@@ -1,4 +1,4 @@
-<img width="150" height="150" align="left" style="float: left; margin: 0 10px 0 0;" alt="Plex" src="./new2 .png">  
+<img width="150" height="150" align="left" style="float: left; margin: 0 10px 0 0;" alt="Plex" src="new2.png">  
 
 # Plex
 
@@ -16,4 +16,5 @@ Plex is a public and semi open source code bot made to just work. It has many le
 * Prefix: The Prefix the bot responds to. Default: !
 * Nickname: The nickname of the bot. Default: Plex
 * Responses: Messages the bot will respond to
-* Many Many more features to configurative, including automat, logging, and more!
+* Highly Advanced Logging via Web hooks
+* Many, Many more features to configure, including automod, logging, and more!
