@@ -10,7 +10,7 @@ documentation:
 framework:
   - ./src/main/*
   
-javascript
+javascript:
   - ./**/*.js
   
 typescript:
