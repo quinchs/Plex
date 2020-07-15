@@ -1,6 +1,6 @@
 {
     "name": "plex",
-    "version": "0.5.",
+    "version": "0.5.4",
     "description": "",
     "main": "dist/index.js",
     "scripts": {
