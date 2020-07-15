@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 import Plex from "../main/Plex";
+
 module.exports = class {
     client: Plex;
     constructor(client: Plex) {
@@ -20,10 +21,10 @@ module.exports = class {
         let i = 0;
         setInterval(function () {
             const toDisplay =
-                status[i].name.replace("{serversCount}", client.guilds.cache.size) +
+                status[i].name.replace("{serversCount}", String(client.guilds.cache.size)) +
                 " | v" +
                 version;
-            client.user.setActivity(toDisplay, { type: status[i].type });
+            client.user.setActivity(toDisplay, { type: status[i].type as any });
             if (status[i + 1]) i++;
             else i = 0;
         }, 20000); // Every 20 seconds
