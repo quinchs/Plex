@@ -10,6 +10,7 @@ import * as member from "./controllers/member";
 import * as guild from "./controllers/guild";
 import parser from "body-parser";
 import axios from "axios";
+import * as Sentry from "@sentry/node";
 
 dotenv.config();
 

@@ -1,8 +1,0 @@
-node_modules
-.vscode
-build
-Dockerfile
-.dockerignore
-yarn.lock
-.git
-.gitignore
