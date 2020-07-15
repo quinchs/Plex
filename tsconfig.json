@@ -12,7 +12,6 @@
       "ESNext.Symbol"
     ],
     "sourceMap": true,
-    "inlineSourceMap": true,
     "incremental": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
