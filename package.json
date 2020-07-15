@@ -1,6 +1,6 @@
 {
     "name": "plex",
-    "version": "0.5.5",
+    "version": "0.5.6",
     "description": "",
     "main": "dist/index.js",
     "scripts": {
@@ -8,7 +8,7 @@
         "build": "rm -rf dist/ && tsc",
         "dev": "ts-node-dev ./src/index.ts",
         "prestart": "rm -rf dist/ && tsc",
-        "test": "ts-node ./src/test.ts"
+        "test": "rm -rf dist/ && tsc && node ./dist/test.js"
     },
     "heroku-run-build-script": true,
     "repository": {
