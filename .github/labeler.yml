@@ -11,10 +11,10 @@ framework:
   - src/main/*
   
 javascript:
-  - *.js
+- any: ['src/**/*.js']
   
 typescript:
-  - *.ts
+- any: ['src/**/*.ts']
   
 Event:
   - src/events/*
