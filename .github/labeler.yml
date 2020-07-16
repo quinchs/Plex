@@ -2,25 +2,25 @@ root:
   - ./*
 
 rest: 
-  - ./src/controllers
+  - src/controllers/**/*
 
 documentation:
-  - ./docs/*
+  - docs/**/*
   
 framework:
-  - ./src/main/*
+  - src/main/**/*
   
 javascript:
-  - ./**/*.js
+- any: ['src/**/*.js']
   
 typescript:
-  - ./**/*.ts
+- any: ['src/**/*.ts']
   
 Event:
-  - ./src/events/*
+  - src/events/**/*
  
 Command: 
-  - ./src/commands/*
+  - src/commands/**/*
 
 
   
