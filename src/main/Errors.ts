@@ -8,8 +8,8 @@ export class CommandError extends Error {
     constructor(DiscordMessage, ...args: any) {
         super(...args);
         this.name = this.constructor.name;
-        this.discordMessage = DiscordMessage
-        this.message = "A command error occurred"
+        this.discordMessage = DiscordMessage;
+        this.message = "A command error occurred";
         CommandError.captureStackTrace(this, CommandError);
     }
 }
@@ -21,14 +21,14 @@ export class CommandError extends Error {
  * @param [argPosition] The arg position
  * @param [requiredArg] The required arg
  */
-export class ArgsError extends CommandError{
+export class ArgsError extends CommandError {
     private araPosition: any;
     private requiredArg: any;
     constructor(DiscordMessage, argPosition, requiredArg, ...args: any) {
-        super(DiscordMessage, ...args)
+        super(DiscordMessage, ...args);
         this.araPosition = argPosition;
-        this.requiredArg = requiredArg
-        this.message = "A argument error occurred"
+        this.requiredArg = requiredArg;
+        this.message = "A argument error occurred";
         ArgsError.captureStackTrace(this, ArgsError);
     }
 }
@@ -39,11 +39,11 @@ export class ArgsError extends CommandError{
  * @param [argPosition] The arg position
  * @param [requiredArg] The required arg
  */
-export class MissingArg extends ArgsError{
+export class MissingArg extends ArgsError {
     constructor(DiscordMessage, argPosition, requiredArg, ...args) {
         super(DiscordMessage, argPosition, requiredArg, ...args);
         MissingArg.captureStackTrace(this, MissingArg);
-        this.message = "A argument was missing in the command"
+        this.message = "A argument was missing in the command";
     }
 }
 /**
@@ -53,11 +53,11 @@ export class MissingArg extends ArgsError{
  * @param [argPosition] The arg position
  * @param [requiredArg] The required arg
  */
-export class MissingMention extends MissingArg{
+export class MissingMention extends MissingArg {
     constructor(DiscordMessage, argPosition, requiredArg, ...args) {
         super(DiscordMessage, argPosition, requiredArg, ...args);
-        MissingMention.captureStackTrace(this, MissingMention)
-        this.message = "A mention/id/tag was expected, but the arg was empty"
+        MissingMention.captureStackTrace(this, MissingMention);
+        this.message = "A mention/id/tag was expected, but the arg was empty";
     }
 }
 /**
@@ -67,11 +67,11 @@ export class MissingMention extends MissingArg{
  * @param [argPosition] The arg position
  * @param [requiredArg] The required arg
  */
-export class InvalidArg extends ArgsError{
+export class InvalidArg extends ArgsError {
     constructor(DiscordMessage, argPoss, requiredArg, ...args) {
-        super(DiscordMessage, argPoss, requiredArg, ...args)
+        super(DiscordMessage, argPoss, requiredArg, ...args);
         InvalidArg.captureStackTrace(this, InvalidArg);
-        this.message = "A argument provided was invalid data"
+        this.message = "A argument provided was invalid data";
     }
 }
 /**
@@ -81,11 +81,12 @@ export class InvalidArg extends ArgsError{
  * @param [argPosition] The arg position
  * @param [requiredArg] The required arg
  */
-export class InvalidMention extends InvalidArg{
+export class InvalidMention extends InvalidArg {
     constructor(DiscordMessage, argPoss, requiredArg, ...args) {
-        super(DiscordMessage, argPoss, requiredArg, ...args)
+        super(DiscordMessage, argPoss, requiredArg, ...args);
         InvalidMention.captureStackTrace(this, InvalidMention);
-        this.message = "A mention/id/tag was expected, but something else was received or it was invalid"
+        this.message =
+            "A mention/id/tag was expected, but something else was received or it was invalid";
     }
 }
 
@@ -95,13 +96,13 @@ export class InvalidMention extends InvalidArg{
  * @param [DiscordMessage] The message that it errored on
  * @param [MissingPermission] The missing permissions
  */
-export class PermissionError extends CommandError{
+export class PermissionError extends CommandError {
     private missingPermission: any;
     constructor(DiscordMessage, MissingPermission, ...args) {
         super(DiscordMessage, ...args);
-        PermissionError.captureStackTrace(this, PermissionError)
-        this.message = "I was not able to complete the command due to a permission error"
-        this.missingPermission = MissingPermission
+        PermissionError.captureStackTrace(this, PermissionError);
+        this.message = "I was not able to complete the command due to a permission error";
+        this.missingPermission = MissingPermission;
     }
 }
 /**
@@ -110,11 +111,12 @@ export class PermissionError extends CommandError{
  * @param [DiscordMessage] The message that it errored on
  * @param [MissingPermission] The missing permissions
  */
-export class BotPermissionError extends PermissionError{
+export class BotPermissionError extends PermissionError {
     constructor(DiscordMessage, MissingPermission, ...args) {
         super(DiscordMessage, MissingPermission, ...args);
         BotPermissionError.captureStackTrace(this, BotPermissionError);
-        this.message = "I was not able to complete a command due to me not having enough permissions"
+        this.message =
+            "I was not able to complete a command due to me not having enough permissions";
     }
 }
 /**
@@ -123,10 +125,11 @@ export class BotPermissionError extends PermissionError{
  * @param [DiscordMessage] The message that it errored on
  * @param [MissingPermission] The missing permissions
  */
-export class UserPermissionError extends PermissionError{
+export class UserPermissionError extends PermissionError {
     constructor(DiscordMessage, MissingPermission, ...args) {
         super(DiscordMessage, MissingPermission, ...args);
         BotPermissionError.captureStackTrace(this, UserPermissionError);
-        this.message = "I was not able to complete a command due to the user not having enough permissions"
+        this.message =
+            "I was not able to complete a command due to the user not having enough permissions";
     }
 }
